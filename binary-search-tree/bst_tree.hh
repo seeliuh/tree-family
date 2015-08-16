@@ -49,7 +49,6 @@ public:
 
         T& operator*() const;
         T* operator->() const;
-
         tree_node *node;
         bst_tree<T, bst_tree_nodeallocator > *order;
     };
@@ -62,11 +61,26 @@ public:
         bool operator==(const in_order_iterator& right);
         bool operator!=(const in_order_iterator& right);
     };
+    class search_iterator : public iterator_base {
+    public:
+        search_iterator(const T& dst, bst_tree *order_tree);
+        search_iterator(tree_node *node, const T& dst, bst_tree *order_tree);
+        search_iterator& operator++();
+        bool operator==(const search_iterator &right);
+        bool operator!=(const search_iterator &right);
+    private:
+        T search_dst;
+    };
 public:
     bst_tree();
     bool insert(const T&x);
+    search_iterator find(const T& dst, search_iterator iter_begin , search_iterator iter_end);
+    search_iterator find(const T& dst);
+
     in_order_iterator begin();
     in_order_iterator end();
+    search_iterator search_begin(const T &dst);
+    search_iterator search_end(const T &dst);
 protected:
     bool insert(tree_node** position, tree_node* parent, const T& x);
     void init();
@@ -107,7 +121,6 @@ bst_tree<T, bst_tree_nodeallocator >::in_order_iterator::in_order_iterator() {
 template <class T, class bst_tree_nodeallocator >
 bst_tree<T, bst_tree_nodeallocator >::in_order_iterator::in_order_iterator(bst_tree<T, bst_tree_nodeallocator >::tree_node *node, bst_tree *order_tree) :
 bst_tree<T, bst_tree_nodeallocator >::iterator_base(node, order_tree) {
-
 };
 
 template <class T, class bst_tree_nodeallocator >
@@ -156,6 +169,60 @@ bool bst_tree<T, bst_tree_nodeallocator >::in_order_iterator::operator!=(const b
     else return false;
 };
 
+// template <class T, class bst_tree_nodeallocator >
+// bst_tree<T, bst_tree_nodeallocator >::search_iterator::search_iterator(const T& dst, bst_tree *order_tree) :
+// bst_tree<T, bst_tree_nodeallocator >::iterator_base::iterator_base(order_tree)
+// {
+//
+// }
+template <class T, class bst_tree_nodeallocator >
+bst_tree<T, bst_tree_nodeallocator >::search_iterator::search_iterator(tree_node *node, const T& dst, bst_tree *order_tree) :
+bst_tree<T, bst_tree_nodeallocator >::iterator_base::iterator_base(node, order_tree) ,
+search_dst(dst) {
+
+}
+template <class T, class bst_tree_nodeallocator >
+typename bst_tree<T, bst_tree_nodeallocator >::search_iterator& bst_tree<T, bst_tree_nodeallocator >::search_iterator::operator++() {
+    assert(this->node!= NULL);
+   if(this->search_dst < this->node->data)  {
+       if(this->node->left_child) {
+           this->node = this->node->left_child;
+           return *this;
+       }
+       else {
+           this->node = this->order->end_flag;
+           return *this;
+       }
+   }
+   else if(this->node->data < this->search_dst) {
+       if(this->node->right_child) {
+           this->node = this->node->right_child;
+           return *this;
+       }
+       else {
+           this->node = this->order->end_flag;
+           return *this;
+       }
+   }
+   else {
+           this->node = this->order->end_flag;
+           return *this;
+   }
+
+}
+
+template <class T, class bst_tree_nodeallocator >
+bool bst_tree<T, bst_tree_nodeallocator >::search_iterator::operator==(const bst_tree<T, bst_tree_nodeallocator >::search_iterator &right) {
+    if(right.node==this->node) return true;
+    else return false;
+}
+
+template <class T, class bst_tree_nodeallocator >
+bool bst_tree<T, bst_tree_nodeallocator >::search_iterator::operator!=(const bst_tree<T, bst_tree_nodeallocator >::search_iterator &right) {
+    if(right.node!=this->node) return true;
+    else return false;
+}
+
 template <class T, class bst_tree_nodeallocator >
 typename bst_tree<T, bst_tree_nodeallocator >::in_order_iterator bst_tree<T, bst_tree_nodeallocator >::begin() {
     if(!head)
@@ -170,6 +237,41 @@ typename bst_tree<T, bst_tree_nodeallocator >::in_order_iterator bst_tree<T, bst
 template <class T, class bst_tree_nodeallocator >
 typename bst_tree<T, bst_tree_nodeallocator >::in_order_iterator bst_tree<T, bst_tree_nodeallocator >::end() {
     return in_order_iterator(end_flag, this);
+}
+
+template <class T, class bst_tree_nodeallocator >
+typename bst_tree<T, bst_tree_nodeallocator >::search_iterator bst_tree<T, bst_tree_nodeallocator >::search_begin(const T &dst) {
+    if(head) {
+        return search_iterator(head, dst, this);
+    }
+    else {
+        return search_iterator(end_flag, dst, this);
+    }
+}
+
+template <class T, class bst_tree_nodeallocator >
+typename bst_tree<T, bst_tree_nodeallocator >::search_iterator bst_tree<T, bst_tree_nodeallocator >::search_end(const T &dst) {
+    return search_iterator(end_flag, dst, this);
+}
+
+template <class T, class bst_tree_nodeallocator >
+typename bst_tree<T, bst_tree_nodeallocator >::search_iterator
+bst_tree<T, bst_tree_nodeallocator >::find(const T& dst, search_iterator iter_begin , search_iterator iter_end) {
+    search_iterator tmp = iter_begin;
+    while(*tmp == dst && tmp!= iter_end) {
+        ++tmp;
+    }
+    return tmp;
+}
+template <class T, class bst_tree_nodeallocator >
+typename bst_tree<T, bst_tree_nodeallocator >::search_iterator
+bst_tree<T, bst_tree_nodeallocator >::find(const T& dst)
+{
+    search_iterator tmp = this->search_begin(dst);
+    while(*tmp == dst && tmp!= this->search_end(dst)) {
+        ++tmp;
+    }
+    return tmp;
 }
 
 template <class T, class bst_tree_nodeallocator >

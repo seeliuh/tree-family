@@ -10,6 +10,7 @@
 #include <algorithm>
 
 #include "bst_tree.hh"
+#include "bst_check_tool.hh"
 
 class test_data
 {
@@ -73,12 +74,27 @@ int main(int argc, char **argv) {
     failed_log.open("./failed.log" );
     bst_tree<test_data> bst;
     gen_test_tree(bst);
+    if(!bst_check(bst)) {
+        std::cout << "something is wrong" << std::endl;
+    }
+
     std::cout << *bst.max;
     int input;
     std::cin >> input;
-    std::for_each(bst.begin(), bst.end(), [](const test_data& x)
-    { std::cout << x << std::endl;}
-    );
+    auto func_printf = [](const test_data& x)
+    { std::cout << x << " ";} ;
+    std::cout << "in_order:" << std::endl;
+    std::for_each(bst.begin(), bst.end(), func_printf);
+    std::cout << std::endl << "search:" << std::endl;
+    test_data dst(979, "");
+    std::for_each(bst.search_begin(dst), bst.search_end(dst), func_printf);
+    bst_tree<test_data >::search_iterator iter = bst.find(dst, bst.search_begin(dst), bst.search_end(dst)) ;
+    if(iter!= bst.search_end(dst)) {
+        std::cout << "found" << std::endl;
+    }
+    iter = bst.find(dst) ;
+    if(iter!= bst.search_end(dst)) {
+        std::cout << "found" << std::endl;
+    }
     std::cout << "done";
 }
-
