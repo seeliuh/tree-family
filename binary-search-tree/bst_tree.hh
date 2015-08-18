@@ -74,15 +74,16 @@ public:
 public:
     bst_tree();
     bool insert(const T&x);
+    bool remove(const T&x);
     search_iterator find(const T& dst, search_iterator iter_begin , search_iterator iter_end);
     search_iterator find(const T& dst);
-
     in_order_iterator begin();
     in_order_iterator end();
     search_iterator search_begin(const T &dst);
     search_iterator search_end(const T &dst);
 protected:
     bool insert(tree_node** position, tree_node* parent, const T& x);
+    bool remove(tree_node** position, tree_node* parent, const T& x);
     void init();
     void try_swap_max(T *x);
     void try_swap_min(T *x);
@@ -258,8 +259,12 @@ template <class T, class bst_tree_nodeallocator >
 typename bst_tree<T, bst_tree_nodeallocator >::search_iterator
 bst_tree<T, bst_tree_nodeallocator >::find(const T& dst, search_iterator iter_begin , search_iterator iter_end) {
     search_iterator tmp = iter_begin;
-    while(*tmp == dst && tmp!= iter_end) {
-        ++tmp;
+    while(tmp!= iter_end) {
+        if(*tmp == dst) {
+            return tmp;
+        } else {
+            ++tmp;
+        }
     }
     return tmp;
 }
@@ -268,8 +273,12 @@ typename bst_tree<T, bst_tree_nodeallocator >::search_iterator
 bst_tree<T, bst_tree_nodeallocator >::find(const T& dst)
 {
     search_iterator tmp = this->search_begin(dst);
-    while(*tmp == dst && tmp!= this->search_end(dst)) {
-        ++tmp;
+    while(tmp!= this->search_end(dst)) {
+        if(*tmp == dst) {
+            return tmp;
+        } else {
+            ++tmp;
+        }
     }
     return tmp;
 }
@@ -311,6 +320,61 @@ bool bst_tree<T, bst_tree_nodeallocator >::insert(tree_node** position, tree_nod
     }
     else {
         return false;
+    }
+}
+
+template <class T, class bst_tree_nodeallocator >
+bool bst_tree<T, bst_tree_nodeallocator >::remove(const T &x) {
+    return remove(&head, NULL, x);
+};
+
+template <class T, class bst_tree_nodeallocator >
+bool bst_tree<T, bst_tree_nodeallocator >::remove(tree_node** position, tree_node* parent, const T& x) {
+    tree_node *cur = *position;
+    tree_node *parent_new_child = NULL;
+    if(*position == NULL)
+        return false;
+    if(cur->data == x) {
+        if(cur->left_child) {
+            parent_new_child = cur->left_child;
+            cur->left_child->right_child = cur->right_child;
+            cur->left_child->parent = parent;
+            if(cur->right_child)
+                cur->right_child->parent = cur;
+        }
+        else if(cur->right_child){
+            parent_new_child = cur->right_child;
+            cur->right_child->left_child = cur->left_child;
+            cur->right_child->parent = parent;
+            if(cur->left_child)
+                cur->left_child->parent = cur;
+        }
+        else {
+        }
+
+        if(cur == cur->parent->left_child) {
+            if(cur->parent) {
+                cur->parent->left_child = parent_new_child;
+            } else {
+                head = parent_new_child;
+            }
+        }
+        else {
+            if(cur->parent) {
+                cur->parent->right_child = parent_new_child;
+            } else {
+                head = parent_new_child;
+            }
+        }
+        alloc_.destroy(cur);
+        alloc_.deallocate(cur,1);
+        return true;
+    }
+    else if(cur->data < x) {
+        return remove(&cur->right_child, cur, x);
+    }
+    else {
+        return remove(&cur->left_child, cur, x);
     }
 }
 

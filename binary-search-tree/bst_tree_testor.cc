@@ -88,13 +88,26 @@ int main(int argc, char **argv) {
     std::cout << std::endl << "search:" << std::endl;
     test_data dst(979, "");
     std::for_each(bst.search_begin(dst), bst.search_end(dst), func_printf);
+
+    //test find
     bst_tree<test_data >::search_iterator iter = bst.find(dst, bst.search_begin(dst), bst.search_end(dst)) ;
     if(iter!= bst.search_end(dst)) {
-        std::cout << "found" << std::endl;
+        std::cout << "found " << *iter << std::endl;
     }
+    //test remove
+    if(bst.remove(dst)) {
+        std::cout << "remove success" << std::endl;
+    } else {
+        std::cout << "remove failed" << std::endl;
+    }
+    std::for_each(bst.search_begin(dst), bst.search_end(dst), func_printf);
+    //test find
     iter = bst.find(dst) ;
     if(iter!= bst.search_end(dst)) {
-        std::cout << "found" << std::endl;
+        std::cout << "found " <<*iter << std::endl;
+    } else {
+        std::cout << "not found" << std::endl;
     }
+
     std::cout << "done";
 }
