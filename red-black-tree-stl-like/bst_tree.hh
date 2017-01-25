@@ -67,14 +67,6 @@ public:
         bool operator==(const in_order_iterator& right);
         bool operator!=(const in_order_iterator& right);
     };
-    class pre_order_iterator : public iterator_base {
-    public:
-        pre_order_iterator();
-        pre_order_iterator(bstnode_t *node, bst_tree *order_tree);
-        pre_order_iterator& operator++();
-        bool operator==(const pre_order_iterator& right);
-        bool operator!=(const pre_order_iterator& right);
-    };
     class search_iterator : public iterator_base {
     public:
         //search_iterator(const T& dst, bst_tree *order_tree);
@@ -192,59 +184,6 @@ bool bst_tree<T, bst_tree_nodeallocator >::in_order_iterator::operator==(const b
 
 template <class T, class bst_tree_nodeallocator >
 bool bst_tree<T, bst_tree_nodeallocator >::in_order_iterator::operator!=(const bst_tree<T, bst_tree_nodeallocator >::in_order_iterator& right) {
-    if(right.node!=this->node) return true;
-    else return false;
-};
-
-
-template <class T, class bst_tree_nodeallocator >
-bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator::pre_order_iterator() {
-
-};
-
-template <class T, class bst_tree_nodeallocator >
-bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator::pre_order_iterator(bst_tree<T, bst_tree_nodeallocator >::bstnode_t *node, bst_tree *order_tree) :
-bst_tree<T, bst_tree_nodeallocator >::iterator_base(node, order_tree) {
-};
-
-template <class T, class bst_tree_nodeallocator >
-typename bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator& bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator::operator++() {
-    assert(this->node!= 0);
-    bstnode_t *next_node = NULL;
-    if(this->node->right) {
-        next_node = this->node->right;
-        while(next_node->left) {
-            next_node = next_node->left;
-        }
-        this->node = next_node;
-        return *this;
-    }
-    else if(this->node == this->node->parent->left) {
-        next_node = this->node->parent;
-        this->node = next_node;
-        return *this;
-    }
-    else if(this->node == this->node->parent->right) {
-        next_node = this->node;
-        while(next_node == next_node->parent->right) {
-            next_node = next_node->parent;
-        }
-        next_node = next_node->parent;
-        this->node = next_node;
-        return *this;
-    }
-    this->node = this->order->end_flag;
-    return *this;
-};
-
-template <class T, class bst_tree_nodeallocator >
-bool bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator::operator==(const bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator& right) {
-    if(right.node==this->node) return true;
-    else return false;
-};
-
-template <class T, class bst_tree_nodeallocator >
-bool bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator::operator!=(const bst_tree<T, bst_tree_nodeallocator >::pre_order_iterator& right) {
     if(right.node!=this->node) return true;
     else return false;
 };
